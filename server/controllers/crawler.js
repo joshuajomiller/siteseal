@@ -8,7 +8,7 @@ class SiteCrawler {
         this.hits = [];
         this.c = new Crawler(
             {
-                maxConnections: 100
+                maxConnections: 500
             }
         );
 
@@ -20,6 +20,7 @@ class SiteCrawler {
 
     crawl(url, source, searchKey, base){
         let self = this;
+        base = base || source;
         url = this.normalizeUrl(url, source);
         if (this.checkLink(url, base)){
             this.previous.push(url);
@@ -41,11 +42,13 @@ class SiteCrawler {
                                 self.hits.push(url);
                             }
                             let subUrls = $("a");
+                            console.log(subUrls);
                             if (Object.keys(subUrls).length) {
                                 console.log('Found ' + Object.keys(subUrls).length + ' links');
                                 Object.keys(subUrls).forEach((item) => {
                                     if (subUrls[item].type === 'tag') {
-                                        self.crawl(subUrls[item], url, searchKey, base)
+                                        console.log('crawl to: ' + subUrls[item].attribs.href);
+                                        self.crawl(subUrls[item].attribs.href, url, searchKey, base)
                                     }
                                 });
                             }
@@ -68,7 +71,8 @@ class SiteCrawler {
         url = new URL(url, source);
         url.hash = '';
         console.log('normalized url: ' + url);
-        return url;
+        console.log('base url: ' + source);
+        return url.href;
     }
 
     checkLink(url, base){
