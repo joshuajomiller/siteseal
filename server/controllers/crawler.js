@@ -27,39 +27,42 @@ class SiteCrawler {
             this.c.queue({
                 uri: url,
                 callback: function (err, res, done) {
-                    if (err) throw err;
-                    let responseUrl = res.request.uri.href;
-                    console.log('responseUrl: ' + responseUrl);
-                    responseUrl = self.normalizeUrl(responseUrl, url);
-                    if (self.validUrl(responseUrl, base)){
-                        if (self.newUrl(responseUrl)){
-                            self.previous.push(responseUrl);
-                        }
-                        try {
-                            let $ = res.$;
-                            let content = $('body').text();
-                            if (content.indexOf(searchKey) !== -1) {
-                                self.hits.push(url);
-                            }
-                            let subUrls = $("a");
-                            console.log(subUrls);
-                            if (Object.keys(subUrls).length) {
-                                console.log('Found ' + Object.keys(subUrls).length + ' links');
-                                Object.keys(subUrls).forEach((item) => {
-                                    if (subUrls[item].type === 'tag') {
-                                        console.log('crawl to: ' + subUrls[item].attribs.href);
-                                        self.crawl(subUrls[item].attribs.href, url, searchKey, base)
-                                    }
-                                });
-                            }
-                            done();
-                        } catch (e) {
-                            console.error(`Encountered an error crawling ${url}. Aborting crawl.`);
-                            console.error(e);
-                            done();
-                        }
-                    } else {
+                    if (err){
+                        console.log(err);
                         done();
+                    } else {
+                        let responseUrl = res.request.uri.href;
+                        console.log('responseUrl: ' + responseUrl);
+                        responseUrl = self.normalizeUrl(responseUrl, url);
+                        if (self.validUrl(responseUrl, base)){
+                            if (self.newUrl(responseUrl)){
+                                self.previous.push(responseUrl);
+                            }
+                            try {
+                                let $ = res.$;
+                                let content = $('body').text();
+                                if (content.indexOf(searchKey) !== -1) {
+                                    self.hits.push(url);
+                                }
+                                let subUrls = $("a");
+                                if (Object.keys(subUrls).length) {
+                                    console.log('Found ' + Object.keys(subUrls).length + ' links');
+                                    Object.keys(subUrls).forEach((item) => {
+                                        if (subUrls[item].type === 'tag' && subUrls[item].attribs && subUrls[item].attribs.href) {
+                                            console.log('crawl to: ' + subUrls[item].attribs.href);
+                                            self.crawl(subUrls[item].attribs.href, url, searchKey, base)
+                                        }
+                                    });
+                                }
+                                done();
+                            } catch (e) {
+                                console.error(`Encountered an error crawling ${url}. Aborting crawl.`);
+                                console.error(e);
+                                done();
+                            }
+                        } else {
+                            done();
+                        }
                     }
                 }
             });
