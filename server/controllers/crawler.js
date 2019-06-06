@@ -18,12 +18,12 @@ class SiteCrawler {
         });
     }
 
-    crawl(url, source, searchKey, base){
+    crawl(url, source, searchKey, base, level){
         let self = this;
         base = base || source;
         url = this.normalizeUrl(url, source);
         if (this.checkLink(url, base)){
-            this.previous.push(url);
+            //this.previous.push(url);
             this.c.queue({
                 uri: url,
                 callback: function (err, res, done) {
@@ -39,20 +39,27 @@ class SiteCrawler {
                                 self.previous.push(responseUrl);
                             }
                             try {
+                                console.log('looking for hits');
                                 let $ = res.$;
                                 let content = $('body').text();
                                 if (content.indexOf(searchKey) !== -1) {
+                                    console.log('hit');
                                     self.hits.push(url);
                                 }
-                                let subUrls = $("a");
-                                if (Object.keys(subUrls).length) {
-                                    console.log('Found ' + Object.keys(subUrls).length + ' links');
-                                    Object.keys(subUrls).forEach((item) => {
-                                        if (subUrls[item].type === 'tag' && subUrls[item].attribs && subUrls[item].attribs.href) {
-                                            console.log('crawl to: ' + subUrls[item].attribs.href);
-                                            self.crawl(subUrls[item].attribs.href, url, searchKey, base)
-                                        }
-                                    });
+                                console.log(level);
+                                if (level < 2) {
+                                    console.log('looking for links');
+                                    let subUrls = $("a");
+                                    console.log(subUrls);
+                                    if (Object.keys(subUrls).length) {
+                                        console.log('Found ' + Object.keys(subUrls).length + ' links');
+                                        Object.keys(subUrls).forEach((item) => {
+                                            if (subUrls[item].type === 'tag' && subUrls[item].attribs && subUrls[item].attribs.href) {
+                                                console.log('crawl to: ' + subUrls[item].attribs.href);
+                                                self.crawl(subUrls[item].attribs.href, url, searchKey, base, ++level);
+                                            }
+                                        });
+                                    }
                                 }
                                 done();
                             } catch (e) {
@@ -61,6 +68,7 @@ class SiteCrawler {
                                 done();
                             }
                         } else {
+                            console.log('not valid');
                             done();
                         }
                     }
