@@ -18,7 +18,7 @@ class SiteCrawler {
         });
     }
 
-    crawl(url, source, searchKey, base, level){
+    crawl(url, source, searchKey, base, level, maxDepth){
         let self = this;
         base = base || source;
         url = this.normalizeUrl(url, source);
@@ -47,7 +47,7 @@ class SiteCrawler {
                                     self.hits.push(url);
                                 }
                                 console.log(level);
-                                if (level < 2) {
+                                if (level < maxDepth) {
                                     console.log('looking for links');
                                     let subUrls = $("a");
                                     console.log(subUrls);
@@ -56,7 +56,7 @@ class SiteCrawler {
                                         Object.keys(subUrls).forEach((item) => {
                                             if (subUrls[item].type === 'tag' && subUrls[item].attribs && subUrls[item].attribs.href) {
                                                 console.log('crawl to: ' + subUrls[item].attribs.href);
-                                                self.crawl(subUrls[item].attribs.href, url, searchKey, base, ++level);
+                                                self.crawl(subUrls[item].attribs.href, url, searchKey, base, ++level, maxDepth);
                                             }
                                         });
                                     }

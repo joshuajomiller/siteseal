@@ -4,11 +4,12 @@ let SiteCrawler = require('../controllers/crawler');
 
 
 /* GET home page. */
-router.get('/:term', function(req, res, next) {
+router.get('/:term/:depth', function(req, res, next) {
   let sc = new SiteCrawler(res);
   let term = req.params.term;
+  let depth = req.params.depth;
   console.log('term ' + term);
-  sc.crawl('http://thesitemill.com', 'http://thesitemill.com', term);
+  sc.crawl('https://www.bbc.com', 'https://www.bbc.com/', term, null, 0, depth);
 });
 
 module.exports = router;
